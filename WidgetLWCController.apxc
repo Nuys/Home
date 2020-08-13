@@ -44,20 +44,20 @@ public with sharing class WidgetLWCController {
             List<Work_Time__c> toUpdateList = new List<Work_Time__c>();
             List<Work_Time__c> workTimeList = [SELECT Date__c, End__c FROM Work_Time__c WHERE End__c = NULL AND Employee__c =: employeeId AND Start__c != NULL  ORDER BY Date__c DESC ];
             if(!workTimeList.isEmpty()){
-               
+                
                 for (Work_Time__c workTime_i : workTimeList){
                     workTime_i.End__c = DateTime.now();
                     toUpdateList.add(workTime_i);
                 }
             }
             if(!toUpdateList.isEmpty()){
-                 responseWrapper = new  ResponseWrapper(true);
+                responseWrapper = new  ResponseWrapper(true);
                 
                 update toUpdateList;
             }else{
                 responseWrapper = new  ResponseWrapper(false, 'Record was not found');
             }
-             
+            
             
             
             
@@ -67,7 +67,7 @@ public with sharing class WidgetLWCController {
             
             
         }
-         
+        
         return JSON.serialize(responseWrapper);
         
     }
