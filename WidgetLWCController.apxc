@@ -1,0 +1,130 @@
+public with sharing class WidgetLWCController {
+    
+    @AuraEnabled(cacheable=false)
+    public static String startCurrentWorkTime(String employeeId){
+        ResponseWrapper responseWrapper;
+        try{
+            
+            DateTime dateNow = DateTime.now();
+            DateTime lessDate = dateNow.addHours(-1).addMinutes(-30); 
+            List<Work_Time__c> toInsertList = new List<Work_Time__c>();
+            List<Work_Time__c> toUpdateList = new List<Work_Time__c>();
+            
+            List<Work_Time__c> workTimeList = [SELECT Date__c, End__c FROM Work_Time__c WHERE Date__c = TODAY AND Employee__c =: employeeId AND Start__c != NULL AND End__c >=: lessDate];
+            if (!workTimeList.isEmpty()){
+                for(Work_Time__c workTime_i : workTimeList){
+                    workTime_i.End__c = NULL;
+                    toUpdateList.add(workTime_i); 
+                }
+                update toUpdateList;
+            }else {
+                Work_Time__c newWorkTime = new Work_Time__c (Start__c = DateTime.now(), 
+                                                             Event_Origin__c = 'Widget' ,
+                                                             Employee__c = employeeId);
+                toInsertList.add(newWorkTime); 
+            } 
+            if(!toInsertList.isEmpty()){
+                insert toInsertList;
+            }
+            responseWrapper  = new  ResponseWrapper(true);
+            
+        }   catch(Exception e){
+            
+            responseWrapper = new ResponseWrapper(false, e.getMessage()); 
+        }
+        
+        return JSON.serialize(responseWrapper);
+    }
+    
+    @AuraEnabled(cacheable=false)
+    public static string endCurrentWorkTime(String employeeId){
+        
+        ResponseWrapper responseWrapper;
+        try{
+            List<Work_Time__c> toUpdateList = new List<Work_Time__c>();
+            List<Work_Time__c> workTimeList = [SELECT Date__c, End__c FROM Work_Time__c WHERE End__c = NULL AND Employee__c =: employeeId AND Start__c != NULL  ORDER BY Date__c DESC ];
+            if(!workTimeList.isEmpty()){
+               
+                for (Work_Time__c workTime_i : workTimeList){
+                    workTime_i.End__c = DateTime.now();
+                    toUpdateList.add(workTime_i);
+                }
+            }
+            if(!toUpdateList.isEmpty()){
+                 responseWrapper = new  ResponseWrapper(true);
+                
+                update toUpdateList;
+            }else{
+                responseWrapper = new  ResponseWrapper(false, 'Record was not found');
+            }
+             
+            
+            
+            
+        }catch(Exception e){
+            
+            responseWrapper = new  ResponseWrapper(false, e.getMessage());
+            
+            
+        }
+         
+        return JSON.serialize(responseWrapper);
+        
+    }
+    
+    
+    
+    
+    
+    @AuraEnabled(cacheable=true)
+    public static String widgetFetchData(){  
+        ResponseWrapper responseWrapper;
+        
+        try{ 
+            Map<String, Object> newMap = WidgetLWCHelper.fetchData();
+            
+            responseWrapper = new  ResponseWrapper(true, newMap);
+            
+            
+        }catch(Exception e){
+            responseWrapper = new  ResponseWrapper(false, e.getMessage());
+            
+        }
+        String timeTest = JSON.serialize(responseWrapper);
+        
+        return JSON.serialize(responseWrapper);
+    }
+    
+    
+    public class ResponseWrapper{
+        
+        @AuraEnabled
+        public Boolean isSuccess;
+        @AuraEnabled
+        public String message;
+        @AuraEnabled
+        public object data;
+        
+        public ResponseWrapper(){}
+        
+        public ResponseWrapper(Boolean isSuccess){
+            this.isSuccess = isSuccess;
+            
+            
+        }
+        
+        public ResponseWrapper(Boolean isSuccess, String message){
+            this.isSuccess = isSuccess;
+            this.message = message;
+            
+        }
+        public ResponseWrapper(Boolean isSuccess , Object data){
+            this.isSuccess = isSuccess;
+            this.data = data;
+        } 
+        
+        
+        
+    }
+    
+}
