@@ -112,67 +112,29 @@ public class WidgetLWCControllerTest {
         
         Profile devProfile = [SELECT Id FROM Profile WHERE Name = 'Developers'];
         
-        User dev = new User(Username = 'globaltest@test2.test22222',
-                            LastName = 'Test',
-                            Email = 'test2@test2.test22222',
-                            CommunityNickname = 'globalt2',
-                            TimeZoneSidKey = 'America/Los_Angeles',
-                            LocaleSidKey = 'uk_UA',
-                            EmailEncodingKey = 'ISO-8859-1',
-                            LanguageLocaleKey = 'en_US',
-                            ProfileId = devProfile.Id,
-                            Alias = 'globalt2',
-                            Google_Apps_Email__c= 'test2@test2.test22222'
-                           );
-        insert dev;
+       	User newTestUser = TestUtils.createUser(devProfile.Id);
+        insert newTestUser;
         
-        Employee__c emp = new Employee__c(Name = 'TestToFetchData',
-                                         User__c = dev.Id,
-                                         Job_Title__c = 'Salesforce Developer',
-                                         RequireWorklog__c = true);
-        insert emp;  
+        Employee__c employeeTest = new Employee__c(Name = 'TestToFetchData',
+                                                   User__c = newTestUser.Id,
+                                                   Job_Title__c = 'Salesforce Developer',
+                                                   RequireWorklog__c = true);
+        insert employeeTest;  
         
         Test.startTest();
-
-        System.runAs(dev){
+        
+        System.runAs(newTestUser){
+            insert TestUtils.createWorkTime(employeeTest.Id, 8, 10);
+            insert TestUtils.createWorkTime(employeeTest.Id, 13, 17);
             
-            Date data1 = Date.today();
+            insert TestUtils.createWorkLog(employeeTest.Id, 'asd');
+            insert TestUtils.createWorkLog(employeeTest.Id, 'sdfasd');
             
-            Work_Time__c firstWorkTime = new Work_Time__c(Start__c =  Datetime.newInstance(data1.year(), data1.month(), data1.day(), 8, 0, 0),
-                                                     End__c = Datetime.newInstance(data1.year(), data1.month(), data1.day(), 10, 0, 0),
-                                                     Employee__c = emp.Id);
+            String resultTest = WidgetLWCController.widgetFetchData();
             
-            insert firstWorkTime;
-            
-            Work_Time__c secondWorkTime = new Work_Time__c(Start__c =  Datetime.newInstance(data1.year(), data1.month(), data1.day(), 13, 0, 0),
-                                                      End__c = Datetime.newInstance(data1.year(), data1.month(), data1.day(), 17, 0, 0),
-                                                      Employee__c = emp.Id);
-            
-            insert secondWorkTime;
-            
-            WorkLog__c firstWorkLog = new WorkLog__c(Description__c = 'asd',
-                                           Type1__c = 'Internal',
-                                           Type__c = 'Internal Event',
-                                           Actual__c = 6,
-                                           Date__c = Date.today(),
-                                           Employee__c = emp.Id);
-            insert firstWorkLog;
-            
-            WorkLog__c secondWorkLog = new WorkLog__c(Description__c = 'sdfasd',
-                                            Type1__c = 'Internal',
-                                            Type__c = 'Internal Event',
-                                            Actual__c = 6,
-                                            Date__c = Date.today(),
-                                            Employee__c = emp.Id);
-            insert secondWorkLog;
-            	String resultTest = WidgetLWCController.widgetFetchData();
-           
             System.assertEquals(true, resultTest.contains('true'));
-            System.assertEquals(true, resultTest.contains(emp.Id));
-            
-            
+            System.assertEquals(true, resultTest.contains(employeeTest.Id));
+                    
         } 
-    }
-   
-  
+    }   
 }
