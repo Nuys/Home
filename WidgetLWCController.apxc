@@ -4,9 +4,7 @@ public with sharing class WidgetLWCController {
     public static String startCurrentWorkTime(String employeeId){
         ResponseWrapper responseWrapper;
         try{
-            
-            DateTime dateNow = DateTime.now();
-            DateTime lessDate = dateNow.addHours(-1).addMinutes(-30); 
+            DateTime lessDate = DateTime.now().addHours(-1).addMinutes(-30); 
             List<Work_Time__c> toInsertList = new List<Work_Time__c>();
             List<Work_Time__c> toUpdateList = new List<Work_Time__c>();
             
@@ -29,10 +27,8 @@ public with sharing class WidgetLWCController {
             responseWrapper  = new  ResponseWrapper(true);
             
         }   catch(Exception e){
-            
             responseWrapper = new ResponseWrapper(false, e.getMessage()); 
         }
-        
         return JSON.serialize(responseWrapper);
     }
     
@@ -56,25 +52,13 @@ public with sharing class WidgetLWCController {
                 update toUpdateList;
             }else{
                 responseWrapper = new  ResponseWrapper(false, 'Record was not found');
-            }
-            
-            
-            
-            
+            }   
         }catch(Exception e){
-            
             responseWrapper = new  ResponseWrapper(false, e.getMessage());
-            
-            
         }
         
         return JSON.serialize(responseWrapper);
-        
     }
-    
-    
-    
-    
     
     @AuraEnabled(cacheable=true)
     public static String widgetFetchData(){  
@@ -109,22 +93,14 @@ public with sharing class WidgetLWCController {
         
         public ResponseWrapper(Boolean isSuccess){
             this.isSuccess = isSuccess;
-            
-            
         }
-        
         public ResponseWrapper(Boolean isSuccess, String message){
             this.isSuccess = isSuccess;
             this.message = message;
-            
         }
         public ResponseWrapper(Boolean isSuccess , Object data){
             this.isSuccess = isSuccess;
             this.data = data;
-        } 
-        
-        
-        
+        }  
     }
-    
 }
