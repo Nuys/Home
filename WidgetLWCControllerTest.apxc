@@ -1,7 +1,6 @@
 @isTest
 public class WidgetLWCControllerTest {
     
-    
     @testSetup 
     private static void setup(){
         
@@ -15,10 +14,7 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name = 'Test' LIMIT 1];
         
-        Work_Time__c newWorkTimeTest = new Work_Time__c (Employee__c = testEmployee.Id,
-                                                         Start__c = Datetime.now().addHours(-4),
-                                                         End__c =  Datetime.now().addHours(-1).addMinutes(-20));
-        insert newWorkTimeTest;
+        insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), Datetime.now().addHours(-1).addMinutes(-20));
         
         Test.startTest();
         String resp = WidgetLWCController.startCurrentWorkTime(testEmployee.Id);
@@ -34,10 +30,7 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name='Test' LIMIT 1];
         
-        Work_Time__c newWorkTimeTest = new Work_Time__c (Employee__c = testEmployee.Id,
-                                                         Start__c = Datetime.now().addHours(-4),
-                                                         End__c = NULL);
-        insert newWorkTimeTest;
+         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL);
         
         Test.startTest();
         WidgetLWCController.startCurrentWorkTime(testEmployee.Id);
@@ -64,15 +57,9 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name='Test' LIMIT 1];
         
-        Work_Time__c firstNewWorkTimeTest = new Work_Time__c (Employee__c = testEmployee.Id,
-                                                              Start__c = Datetime.now().addHours(-4),
-                                                              End__c = NULL);
-        insert firstNewWorkTimeTest;
-        
-        Work_Time__c secondNewWorkTimeTest = new Work_Time__c (Employee__c = testEmployee.Id,
-                                                               Start__c = Datetime.now().addHours(-3),
-                                                               End__c = NULL);
-        insert secondNewWorkTimeTest;
+
+        insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL);        
+        insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-3), NULL);
         
         Test.startTest();
         WidgetLWCController.endCurrentWorkTime(testEmployee.Id);
@@ -80,7 +67,7 @@ public class WidgetLWCControllerTest {
         
         List <Work_Time__c> toSelectWTTest = [SELECT End__c FROM Work_Time__c WHERE End__c = NULL]; 
         System.assertEquals(0, toSelectWTTest.size());
-        Work_Time__c toSelectWorkTimeTest = [SELECT End__c FROM Work_Time__c WHERE Id =: secondNewWorkTimeTest.Id LIMIT 1];
+        Work_Time__c toSelectWorkTimeTest = [SELECT End__c FROM Work_Time__c LIMIT 1];
         System.assertEquals(DateTime.now().hour(), toSelectWorkTimeTest.End__c.hour());
     }
     
@@ -89,11 +76,8 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name='Test' LIMIT 1];
         
-        Work_Time__c newWorkTimeTest = new Work_Time__c (Employee__c = testEmployee.Id,
-                                                         Start__c = Datetime.now().addHours(-4),
-                                                         End__c = NULL);
+        insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL); 
         
-        insert newWorkTimeTest;
         Test.startTest();
         String respEnd = WidgetLWCController.endCurrentWorkTime('testExeptionId');
         String respStart = WidgetLWCController.startCurrentWorkTime('testExeptionId');
@@ -112,7 +96,7 @@ public class WidgetLWCControllerTest {
         
         Profile devProfile = [SELECT Id FROM Profile WHERE Name = 'Developers'];
         
-       	User newTestUser = TestUtils.createUser(devProfile.Id);
+        User newTestUser = TestUtils.createUser(devProfile.Id);
         insert newTestUser;
         
         Employee__c employeeTest = new Employee__c(Name = 'TestToFetchData',
@@ -124,8 +108,9 @@ public class WidgetLWCControllerTest {
         Test.startTest();
         
         System.runAs(newTestUser){
-            insert TestUtils.createWorkTime(employeeTest.Id, 8, 10);
-            insert TestUtils.createWorkTime(employeeTest.Id, 13, 17);
+            
+            insert TestUtils.createWorkTime(employeeTest.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 8, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 10, 0, 0));
+            insert TestUtils.createWorkTime(employeeTest.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 13, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 17, 0, 0));
             
             insert TestUtils.createWorkLog(employeeTest.Id, 'asd');
             insert TestUtils.createWorkLog(employeeTest.Id, 'sdfasd');
@@ -134,7 +119,7 @@ public class WidgetLWCControllerTest {
             
             System.assertEquals(true, resultTest.contains('true'));
             System.assertEquals(true, resultTest.contains(employeeTest.Id));
-                    
+            
         } 
     }   
 }
