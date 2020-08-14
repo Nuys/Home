@@ -3,15 +3,11 @@ public class WidgetLWCControllerTest {
     
     @testSetup 
     private static void setup(){
-        
-        Employee__c newTestEmployee = new Employee__c(Job_Title__c = 'Account Manager',
-                                                      Name = 'Test');
-        insert newTestEmployee; 
+        insert TestUtils.createEmployee(NULL,'Test','Salesforce Developer');
     }
     
     @isTest 
     private static void closedLessTimeTest(){
-        
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name = 'Test' LIMIT 1];
         
         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), Datetime.now().addHours(-1).addMinutes(-20));
@@ -30,7 +26,7 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name='Test' LIMIT 1];
         
-         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL);
+        insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL);
         
         Test.startTest();
         WidgetLWCController.startCurrentWorkTime(testEmployee.Id);
@@ -57,7 +53,7 @@ public class WidgetLWCControllerTest {
         
         Employee__c testEmployee = [SELECT Id FROM Employee__c WHERE Name='Test' LIMIT 1];
         
-
+        
         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL);        
         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-3), NULL);
         
@@ -79,6 +75,7 @@ public class WidgetLWCControllerTest {
         insert TestUtils.createWorkTime(testEmployee.Id, Datetime.now().addHours(-4), NULL); 
         
         Test.startTest();
+        
         String respEnd = WidgetLWCController.endCurrentWorkTime('testExeptionId');
         String respStart = WidgetLWCController.startCurrentWorkTime('testExeptionId');
         
@@ -87,39 +84,33 @@ public class WidgetLWCControllerTest {
         System.assertEquals(true, respStart.contains('false'));
         System.assertEquals(true, respStart.contains('Invalid id'));
         System.assertEquals(true, respEnd.contains('false'));
-        System.assertEquals(true, respEnd.contains('Record was not found'));
-        
+        System.assertEquals(true, respEnd.contains('Record was not found')); 
     }
+    
     @isTest 
     private static void fetchDataTest(){
-        
-        
         Profile devProfile = [SELECT Id FROM Profile WHERE Name = 'Developers'];
         
         User newTestUser = TestUtils.createUser(devProfile.Id);
         insert newTestUser;
         
-        Employee__c employeeTest = new Employee__c(Name = 'TestToFetchData',
-                                                   User__c = newTestUser.Id,
-                                                   Job_Title__c = 'Salesforce Developer',
-                                                   RequireWorklog__c = true);
-        insert employeeTest;  
+        Employee__c testEmployee =  TestUtils.createEmployee(newTestUser.Id,'TestToFetchData','Salesforce Developer');
+        insert testEmployee;
         
         Test.startTest();
-        
         System.runAs(newTestUser){
             
-            insert TestUtils.createWorkTime(employeeTest.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 8, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 10, 0, 0));
-            insert TestUtils.createWorkTime(employeeTest.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 13, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 17, 0, 0));
+            insert TestUtils.createWorkTime(testEmployee.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 8, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 10, 0, 0));
+            insert TestUtils.createWorkTime(testEmployee.Id, Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 13, 0, 0), Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), 17, 0, 0));
             
-            insert TestUtils.createWorkLog(employeeTest.Id, 'asd');
-            insert TestUtils.createWorkLog(employeeTest.Id, 'sdfasd');
+            insert TestUtils.createWorkLog(testEmployee.Id, 'asd');
+            insert TestUtils.createWorkLog(testEmployee.Id, 'sdfasd');
             
             String resultTest = WidgetLWCController.widgetFetchData();
             
             System.assertEquals(true, resultTest.contains('true'));
-            System.assertEquals(true, resultTest.contains(employeeTest.Id));
-            
-        } 
+            System.assertEquals(true, resultTest.contains(testEmployee.Id));
+        }
+        Test.stopTest();
     }   
 }
