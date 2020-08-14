@@ -1,19 +1,19 @@
 public with sharing class TestUtils {
     private static final String AccountTypeCompanyId = [SELECT Id FROM RecordType WHERE SobjectType = 'Account__c' AND Name = 'Company'].Id;
     private static final String AccountTypeContractId = [SELECT Id FROM RecordType WHERE SobjectType = 'Account__c' AND Name = 'Contract'].Id;
-
+    
     public static Account__c createCompanyAccount(){
         Account__c accountItem = new Account__c(Name = 'Test Account',
                                                 recordTypeId = AccountTypeCompanyId);
         return accountItem;
     }
-
+    
     public static Account__c createContractAccount(){
         Account__c accountItem = new Account__c(Name = 'Test Account',
                                                 recordTypeId = AccountTypeContractId);
         return accountItem;
     }
-
+    
     public static Project__c createProject(Account__c companyAccount, Account__c contractAccount){
         Project__c projectItem = new Project__c(Name = 'Test Project',
                                                 Company_Account__c = companyAccount.Id,
@@ -23,7 +23,7 @@ public with sharing class TestUtils {
                                                 Max__c = 50);
         return projectItem;
     }
-
+    
     public static Credentials__c createCredentials(Account__c companyAccount){
         Credentials__c credentialsItem = new Credentials__c(Name = 'Test Credentials',
                                                             Account__c = companyAccount.Id,
@@ -32,58 +32,59 @@ public with sharing class TestUtils {
                                                             Password__c = 'password');
         return credentialsItem;
     }
-
+    
     public static Task__c createTask(Project__c project, Credentials__c credentials){
         Task__c taskItem = new Task__c(Summary__c = 'Test Summary',
                                        Status__c = 'In Progress',
                                        Project__c = project.Id);
         return taskItem;
     }    
-
+    
     public static Invoice__c createInvoice(Account__c account){
         return new Invoice__c(CurrencyIsoCode = 'USD', Account__c = account.Id, Name = 'Test Invoice');
     }
-
+    
     public static Invoice_Line_Item__c createInvoiceLineItem(Invoice__c invoice){
         return new Invoice_Line_Item__c(Invoice__c = invoice.Id, CurrencyIsoCode = invoice.CurrencyIsoCode);
     }
-    public static Work_Time__c createWorkTime(String employeeId , Integer hourStart, Integer hourEnd){//for WidgetLWCController
-        return new Work_Time__c(Start__c =  Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), hourStart, 0, 0),
-                                                     End__c = Datetime.newInstance(Date.today().year(), Date.today().month(), Date.today().day(), hourEnd, 0, 0),
-                                                     Employee__c = employeeId);
-    }
- 
+
+    
     public static WorkLog__c createWorkLog(String employeeId , String description){//for WidgetLWCController
         return new  WorkLog__c(Description__c = description,
-                                           Type1__c = 'Internal',
-                                           Type__c = 'Internal Event',
-                                           Actual__c = 6,
-                                           Date__c = Date.today(),
-                                           Employee__c = employeeId);
+                               Type1__c = 'Internal',
+                               Type__c = 'Internal Event',
+                               Actual__c = 6,
+                               Date__c = Date.today(),
+                               Employee__c = employeeId);
     }
-     
+    
     public static User createUser(String profileId){//for WidgetLWCController
         return new User(Username = 'globaltest@test2.test22222',
-                            LastName = 'Test',
-                            Email = 'test2@test2.test22222',
-                            CommunityNickname = 'globalt2',
-                            TimeZoneSidKey = 'America/Los_Angeles',
-                            LocaleSidKey = 'uk_UA',
-                            EmailEncodingKey = 'ISO-8859-1',
-                            LanguageLocaleKey = 'en_US',
-                            ProfileId = profileId,
-                            Alias = 'globalt2',
-                            Google_Apps_Email__c= 'test2@test2.test22222'
-                           );
+                        LastName = 'Test',
+                        Email = 'test2@test2.test22222',
+                        CommunityNickname = 'globalt2',
+                        TimeZoneSidKey = 'America/Los_Angeles',
+                        LocaleSidKey = 'uk_UA',
+                        EmailEncodingKey = 'ISO-8859-1',
+                        LanguageLocaleKey = 'en_US',
+                        ProfileId = profileId,
+                        Alias = 'globalt2',
+                        Google_Apps_Email__c= 'test2@test2.test22222'
+                       );
+    }
+    public static Work_Time__c createWorkTime(String employeeId , DateTime dateTimeStart, DateTime dateTimeEnd ){//for WidgetLWCController
+        return new Work_Time__c(Start__c =  dateTimeStart,
+                                End__c = dateTimeEnd,
+                                Employee__c = employeeId);
     }
     
     //public static Contract__c createContract(){
     //  return new Contract__c(Name = 'TestContract');
     //}
-
+    
     //public static Order__c createOrder(Contract__c contract){
     //  return new Order__c(Contract__c = contract.Id);
     //}
-
-
+    
+    
 }
